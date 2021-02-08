@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authorizer-deployment
+  labels:
+    app: authorizer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: authorizer
+  template:
+    metadata:
+      labels:
+        app: authorizer
+    spec:
+      containers:
+      - name: authorizer
+        image: pashinov/authorizer
+        ports:
+          - containerPort: 9376
+        env:
+          - name: BACKEND_APP_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: backend-app-client-secret
+                key: client-id
+          - name: BACKEND_APP_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: backend-app-client-secret
+                key: client-secret
+        volumeMounts:
+          - name: authorizer-config-volume
+            mountPath: /etc/config/authorizer.json
+            subPath: authorizer-config.json
+      volumes:
+        - name: authorizer-config-volume
+          configMap:
+            name: authorizer-config

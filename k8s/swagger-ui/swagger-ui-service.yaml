@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: swagger-ui-service
+  labels:
+    app: swagger-ui
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  selector:
+    app: swagger-ui

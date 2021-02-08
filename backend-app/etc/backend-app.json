@@ -1,0 +1,13 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 9377
+  },
+
+  "identityServer": {
+    "url": "url",
+    "resources": {
+      "userinfo": "/auth/realms/{realms}/protocol/openid-connect/userinfo"
+    }
+  }
+}

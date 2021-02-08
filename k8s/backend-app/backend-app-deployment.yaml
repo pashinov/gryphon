@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-app-deployment
+  labels:
+    app: backend-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-app
+  template:
+    metadata:
+      labels:
+        app: backend-app
+    spec:
+      containers:
+        - name: backend-app
+          image: pashinov/backend-app
+          ports:
+            - containerPort: 9377
+          env:
+            - name: CLIENT_ID
+              value: "backend-app"
+            - name: IDENTIFIER_URL
+              value: "http://keycloak.192.168.99.100.nip.io/auth/realms/gryphon"
+          volumeMounts:
+            - name: backend-app-config-volume
+              mountPath: /etc/config/backend-app.json
+              subPath: backend-app-config.json
+      volumes:
+        - name: backend-app-config-volume
+          configMap:
+            name: backend-app-config

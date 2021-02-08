@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger-ui-deployment
+  labels:
+    app: swagger-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger-ui
+  template:
+    metadata:
+      labels:
+        app: swagger-ui
+    spec:
+      initContainers:
+        - name: copy-swagger-authorizer
+          image: pashinov/authorizer
+          command:
+            - cp
+            - /docs/swagger/authorizer-swagger.yaml
+            - /swagger/authorizer-swagger.yaml
+          volumeMounts:
+            - name: swagger-docs
+              mountPath: /swagger
+        - name: copy-swagger-backend-app
+          image: pashinov/backend-app
+          command:
+            - cp
+            - /docs/swagger/backend-app-swagger.yaml
+            - /swagger/backend-app-swagger.yaml
+          volumeMounts:
+            - name: swagger-docs
+              mountPath: /swagger
+      containers:
+        - name: swagger-ui
+          image: swaggerapi/swagger-ui:v3.24.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: BASE_URL
+              value: /swagger
+            - name: URLS_PRIMARY_NAME
+              value: Authorizer
+            - name: URLS
+              value: >-
+                [{"name": "Authorizer", "url":"/swagger/docs/authorizer-swagger.yaml"},
+                {"name": "Backend Application", "url":"/swagger/docs/backend-app-swagger.yaml"}]
+          volumeMounts:
+            - name: swagger-docs
+              mountPath: /usr/share/nginx/html/docs
+              readOnly: true
+      volumes:
+        - name: swagger-docs
+          emptyDir: { }

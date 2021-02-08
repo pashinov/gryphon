@@ -1,0 +1,36 @@
+# Start from the latest golang base image
+FROM golang:alpine AS builder
+
+# Add Maintainer Info
+MAINTAINER Alexey Pashinov <pashinov93@gmail.com>
+
+# Setup the Current Working Directory inside the container
+ENV GOPATH  /go
+ENV PROJECT_ROOT $GOPATH/src/gryphon/backend-app
+RUN mkdir -p $PROJECT_ROOT
+COPY backend-app/. $PROJECT_ROOT
+COPY docs $PROJECT_ROOT
+WORKDIR $PROJECT_ROOT
+
+# Build the Go app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app/backend-app .
+
+COPY docs /app/docs
+
+######## Start a new stage from scratch #######
+FROM alpine AS final
+
+WORKDIR /root
+
+# Copy the Pre-built binary file
+COPY --from=builder /app/backend-app .
+COPY --from=builder /app/docs /docs
+
+# Mount volume
+VOLUME /config
+
+# Expose port to the outside world
+EXPOSE 9377
+
+# Command to run the executable
+ENTRYPOINT ["./backend-app", "-c", "/etc/config/backend-app.json"]

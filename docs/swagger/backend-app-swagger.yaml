@@ -1,0 +1,41 @@
+openapi: 3.0.1
+info:
+  title: Backend application
+  description: |
+    A simple backend service provides API for getting user information
+  version: 0.1.0
+servers:
+  - url: /
+paths:
+  /backend-app/user/info:
+    get:
+      tags:
+        - User Information
+      summary: Obtain user information
+      responses:
+        200:
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+      security:
+        - JWT: []
+
+components:
+  schemas:
+    UserInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+
+  securitySchemes:
+    JWT:
+      name: Authorization
+      type: apiKey
+      in: header
